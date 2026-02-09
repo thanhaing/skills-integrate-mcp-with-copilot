@@ -130,3 +130,26 @@ def unregister_from_activity(activity_name: str, email: str):
     # Remove student
     activity["participants"].remove(email)
     return {"message": f"Unregistered {email} from {activity_name}"}
+
+
+# --- Merit-based sorting endpoint ---
+from collections import Counter
+
+@app.get("/merit-sorting")
+def merit_sorting():
+    """
+    Returns a sorted list of students by their participation count (merit).
+    This is a simple merit metric: number of activities participated in.
+    """
+    # Gather all participants
+    all_participants = []
+    for activity in activities.values():
+        all_participants.extend(activity["participants"])
+
+    # Count participation
+    merit_counter = Counter(all_participants)
+    # Sort by participation count descending
+    sorted_merit = sorted(merit_counter.items(), key=lambda x: x[1], reverse=True)
+
+    # Return as list of dicts
+    return [{"email": email, "merit_score": score} for email, score in sorted_merit]
